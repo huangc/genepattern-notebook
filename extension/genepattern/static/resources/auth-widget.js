@@ -25,12 +25,12 @@ var GENEPATTERN_SERVERS = [
     ['Custom GenePattern Server', 'Custom']
 ];
 
-define("gp_auth", ["base/js/namespace",
-                   "nbextensions/jupyter-js-widgets/extension",
-                   "nbextensions/genepattern/index",
-                   "jqueryui"], function (Jupyter, widgets) {
+require(["base/js/namespace",
+         "nbextensions/jupyter-js-widgets/extension",
+         "nbextensions/genepattern/index",
+         "jqueryui"], function(Jupyter, widgets) {
 
-    $.widget("gp.auth", {
+        $.widget("gp.auth", {
         options: {
             servers: GENEPATTERN_SERVERS,
 
@@ -49,9 +49,21 @@ define("gp_auth", ["base/js/namespace",
             // Add data pointer
             this.element.data("widget", this);
 
+            // Turn double-click off for cell
+            this.options.cell.element.dblclick(function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            this.options.cell.element.find(".prompt").dblclick(function (e) {
+                e.stopPropagation();
+            });
+
             // Render the view.
             this.element
                 .addClass("panel panel-primary gp-widget gp-widget-auth")
+                .dblclick(function (e) {
+                    e.stopPropagation();
+                })
                 .append(
                     $("<div></div>")
                         .addClass("panel-heading")
@@ -77,23 +89,6 @@ define("gp_auth", ["base/js/namespace",
                                         .tooltip()
                                         .click(function() {
                                             widget.expandCollapse();
-                                        })
-                                )
-                                .append(" ")
-                                .append(
-                                    $("<button></button>")
-                                        .addClass("btn btn-default btn-sm")
-                                        .css("padding", "2px 7px")
-                                        .attr("title", "Toggle Code View")
-                                        .attr("data-toggle", "tooltip")
-                                        .attr("data-placement", "bottom")
-                                        .append(
-                                            $("<span></span>")
-                                                .addClass("fa fa-terminal")
-                                        )
-                                        .tooltip()
-                                        .click(function() {
-                                            widget.toggleCode();
                                         })
                                 )
                         )
@@ -192,6 +187,9 @@ define("gp_auth", ["base/js/namespace",
                                                         widget._enterPressed();
                                                     }
                                                 })
+                                                .keydown(function (e) {
+                                                    e.stopPropagation();
+                                                })
                                         )
                                 )
                                 .append(
@@ -213,6 +211,9 @@ define("gp_auth", ["base/js/namespace",
                                                     if (e.keyCode == 13) {
                                                         widget._enterPressed();
                                                     }
+                                                })
+                                                .keydown(function (e) {
+                                                    e.stopPropagation();
                                                 })
                                         )
                                 )
@@ -590,40 +591,6 @@ define("gp_auth", ["base/js/namespace",
             }
         },
 
-        toggleCode: function() {
-            var code = this.element.find(".widget-code");
-            var view = this.element.find(".widget-view");
-
-            if (code.is(":hidden")) {
-                this.options.cell.code_mirror.refresh();
-                var raw = this.element.closest(".cell").find(".input").html();
-                code.html(raw);
-
-                // Fix the issue where the code couldn't be selected
-                code.find(".CodeMirror-scroll").attr("draggable", "false");
-
-                // Fix the issue with the bogus scrollbars
-                code.find(".CodeMirror-hscrollbar").remove();
-                code.find(".CodeMirror-vscrollbar").remove();
-                code.find(".CodeMirror-sizer").css("min-width", "").css("overflow", "auto");
-
-                view.slideUp();
-                code.slideDown();
-            }
-            else {
-                // If normally collapsed
-                var collapsed = this.element.find(".widget-slide-indicator").find(".fa-plus").length > 0;
-                if (collapsed) {
-                    code.slideUp();
-                }
-                // If otherwise expanded
-                else {
-                    view.slideDown();
-                    code.slideUp();
-                }
-            }
-        },
-
         buildCode: function(server, username, password) {
             var code = GenePattern.notebook.init.buildCode(server, username, password);
             var cell = this.options.cell;
@@ -844,6 +811,12 @@ define("gp_auth", ["base/js/namespace",
             }
         }
     });
+});
+
+define("gp_auth", ["base/js/namespace",
+                   "nbextensions/jupyter-js-widgets/extension",
+                   "nbextensions/genepattern/index",
+                   "jqueryui"], function (Jupyter, widgets) {
 
     Jupyter.keyboard_manager.command_shortcuts.add_shortcut('Shift-d', {
         help : 'toggle dev servers',

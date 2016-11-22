@@ -1034,14 +1034,52 @@ GPAuthWidget(gpserver)';
 };
 
 /**
+ * Render GenePattern markdown-based widgets
+ */
+GenePattern.notebook.renderMarkdownWidget = function(index) {
+    var cell = Jupyter.notebook.get_cell(index);
+    var markdown = cell.code_mirror.getValue();
+    var parts = markdown.trim().split('|');
+
+    // Validation
+    if (parts[0] !== "#!GenePattern" || parts.length < 2) {
+        console.log("Error rendering markdown widget: " + markdown);
+        return;
+    }
+
+    var type = parts[1];
+
+    if (type.toLowerCase() === "auth") {
+        require(["nbextensions/genepattern/resources/auth-widget"], function(gpauth) {
+            var div = cell.element.find(".rendered_html").empty();
+            console.log(gpauth);
+            $(div).auth({
+                cell: cell
+            });
+        });
+    }
+
+    console.log(parts);
+};
+
+/**
  * Automatically run all GenePattern widgets
  */
 GenePattern.notebook.init.auto_run_widgets = function() {
-    console.log("auto_run_widgets");
+    // Run ipywidgets-style widgets
     require(["nbextensions/jupyter-js-widgets/extension"], function() {
         $.each($(".cell"), function(index, val) {
             if ($(val).html().indexOf("# !AUTOEXEC") > -1) {
                 Jupyter.notebook.get_cell(index).execute();
+            }
+        });
+    });
+
+    // Run markdown-based widgets
+    require(["nbextensions/jupyter-js-widgets/extension"], function() {
+        $.each($(".cell"), function(index, val) {
+            if ($(val).html().indexOf("#!GenePattern") > -1) {
+                GenePattern.notebook.renderMarkdownWidget(index);
             }
         });
     });

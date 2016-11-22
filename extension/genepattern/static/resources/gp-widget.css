@@ -13,10 +13,19 @@
     left: 7px;
 }
 
-.gp-widget {
+div.gp-widget {
     width: 100%;
     max-width: 100%;
     border-color: rgba(10, 45, 105, 0.80);
+    border-style: solid;
+    padding: 0;
+}
+
+.gp-widget h3.panel-title {
+    font-size: medium;
+    margin: auto;
+    font-weight: normal;
+    line-height: normal;
 }
 
 .gp-widget .panel-heading {
@@ -28,16 +37,17 @@
     font-weight: bold;
 }
 
-.gp-widget-logo {
+img.gp-widget-logo {
     height: 20px;
     float: left;
     padding-right: 10px;
     position: relative;
     left: -5px;
     top: -2px;
+    margin-top: auto;
 }
 
-.widget-username-label {
+span.widget-username-label {
     font-style: italic;
 }
 
